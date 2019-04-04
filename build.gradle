@@ -32,11 +32,14 @@ dependencies {
     compile group: "org.jetbrains.kotlin", name: "kotlin-compiler-embeddable", version: kotlinVersion
     compile group: "org.jetbrains.kotlin", name: "kotlin-stdlib", version: kotlinVersion
     compile group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: kotlinVersion
+    testCompile group: "junit", name: "junit", version: "4.12"
 }
 
 sourceSets {
     main.kotlin.srcDirs += "src"
     main.java.srcDirs += "src"
+    test.kotlin.srcDirs += "test"
+    test.java.srcDirs += "test"
 }
 
 task publishJars(dependsOn: build) {

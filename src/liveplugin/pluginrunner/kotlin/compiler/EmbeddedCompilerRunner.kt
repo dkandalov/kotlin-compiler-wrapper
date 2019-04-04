@@ -26,14 +26,14 @@ import kotlin.jvm.internal.Reflection
 fun compile(
     sourceRoot: String,
     classpath: List<File>,
-    compilerOutput: File,
+    outputDirectory: File,
     kotlinScriptTemplateClass: Class<*>
 ): List<String> {
     val rootDisposable = Disposer.newDisposable()
 
     try {
         val messageCollector = ErrorMessageCollector()
-        val configuration = createCompilerConfiguration(sourceRoot, classpath, compilerOutput, messageCollector, kotlinScriptTemplateClass)
+        val configuration = createCompilerConfiguration(sourceRoot, classpath, outputDirectory, messageCollector, kotlinScriptTemplateClass)
         val kotlinEnvironment = KotlinCoreEnvironment.createForProduction(rootDisposable, configuration, JVM_CONFIG_FILES)
         val state = KotlinToJVMBytecodeCompiler.analyzeAndGenerate(kotlinEnvironment)
 
@@ -65,7 +65,7 @@ private class ErrorMessageCollector: MessageCollector {
 private fun createCompilerConfiguration(
     sourceRoot: String,
     classpath: List<File>,
-    compilerOutput: File,
+    outputDirectory: File,
     messageCollector: MessageCollector,
     kotlinScriptTemplateClass: Class<*>
 ): CompilerConfiguration {
@@ -81,7 +81,7 @@ private fun createCompilerConfiguration(
         }
 
         put(RETAIN_OUTPUT_IN_MEMORY, false)
-        put(OUTPUT_DIRECTORY, compilerOutput)
+        put(OUTPUT_DIRECTORY, outputDirectory)
     }
 }
 
