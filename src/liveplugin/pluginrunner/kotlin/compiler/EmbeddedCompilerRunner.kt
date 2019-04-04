@@ -22,7 +22,7 @@ import kotlin.jvm.internal.Reflection
 
 
 @Suppress("unused")
-fun compilePlugin(
+fun compile(
     sourceRoot: String,
     classpath: List<File>,
     compilerOutput: File,
@@ -38,15 +38,15 @@ fun compilePlugin(
 
         return when {
             messageCollector.hasErrors() -> messageCollector.errors
-            state == null -> listOf("Compiler returned empty state.")
-            else -> emptyList()
+            state == null                -> listOf("Compiler returned empty state.")
+            else                         -> emptyList()
         }
     } finally {
         rootDisposable.dispose()
     }
 }
 
-private class ErrorMessageCollector : MessageCollector {
+private class ErrorMessageCollector: MessageCollector {
     val errors = ArrayList<String>()
 
     override fun report(severity: CompilerMessageSeverity, message: String, location: CompilerMessageLocation?) {
@@ -55,9 +55,7 @@ private class ErrorMessageCollector : MessageCollector {
         }
     }
 
-    override fun clear() {
-        errors.clear()
-    }
+    override fun clear() = errors.clear()
 
     override fun hasErrors() = errors.isNotEmpty()
 }
@@ -71,13 +69,13 @@ private fun createCompilerConfiguration(
     kotlinScriptTemplateClass: Class<*>
 ): CompilerConfiguration {
     return CompilerConfiguration().apply {
-        put(MODULE_NAME, "LivePluginScript")
+        put(MODULE_NAME, "KotlinCompilerWrapperModule")
         put(MESSAGE_COLLECTOR_KEY, messageCollector)
         add(SCRIPT_DEFINITIONS, KotlinScriptDefinition(Reflection.createKotlinClass(kotlinScriptTemplateClass)))
 
         add(CONTENT_ROOTS, KotlinSourceRoot(sourceRoot))
 
-        for (path in classpath) {
+        classpath.forEach { path ->
             add(CONTENT_ROOTS, JvmClasspathRoot(path))
         }
 
