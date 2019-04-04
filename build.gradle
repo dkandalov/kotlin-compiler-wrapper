@@ -19,7 +19,7 @@ compileKotlin {
     }
 }
 kotlin.experimental.coroutines = "enable"
-ext.kotlinVersion = "1.1.4"
+ext.kotlinVersion = "1.3.20"
 
 repositories {
     mavenCentral()

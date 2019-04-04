@@ -1,6 +1,8 @@
 package liveplugin.pluginrunner.kotlin.compiler
 
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.CONTENT_ROOTS
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
+import org.jetbrains.kotlin.cli.common.config.KotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
@@ -15,7 +17,6 @@ import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
-import org.jetbrains.kotlin.config.KotlinSourceRoot
 import org.jetbrains.kotlin.script.KotlinScriptDefinition
 import java.io.File
 import kotlin.jvm.internal.Reflection
@@ -73,7 +74,7 @@ private fun createCompilerConfiguration(
         put(MESSAGE_COLLECTOR_KEY, messageCollector)
         add(SCRIPT_DEFINITIONS, KotlinScriptDefinition(Reflection.createKotlinClass(kotlinScriptTemplateClass)))
 
-        add(CONTENT_ROOTS, KotlinSourceRoot(sourceRoot))
+        add(CONTENT_ROOTS, KotlinSourceRoot(path = sourceRoot, isCommon = false))
 
         classpath.forEach { path ->
             add(CONTENT_ROOTS, JvmClasspathRoot(path))
