@@ -3,9 +3,11 @@ package liveplugin.pluginrunner.kotlin.compiler
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 
+@Ignore // Because gradle won't have "kotlin_stdlib_path"
 class EmbeddedCompilerRunnerTests {
     @Test fun `can compile an empty file`() =
         KtsScriptFixture(

@@ -26,7 +26,7 @@ repositories {
 }
 
 group "live-plugin"
-version "0.1.0"
+version "0.1.1"
 
 dependencies {
     compile group: "org.jetbrains.kotlin", name: "kotlin-compiler-embeddable", version: kotlinVersion
