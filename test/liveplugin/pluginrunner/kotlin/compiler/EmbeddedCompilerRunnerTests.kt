@@ -7,7 +7,7 @@ import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 
-@Ignore // Because gradle won't have "kotlin_stdlib_path"
+@Ignore // Run manually because gradle won't have "kotlin_stdlib_path".
 class EmbeddedCompilerRunnerTests {
     @Test fun `can compile an empty file`() =
         KtsScriptFixture(
@@ -45,7 +45,7 @@ data class KtsScriptFixture(
 
     fun compile(): List<String> = compile(
         sourceRoot = srcDir.absolutePath,
-        classpath = listOf(File(kotlinStdLibPath), File("build/classes/java/test/")),
+        classpath = listOf(File(kotlinStdLibPath), File("build/classes/kotlin/test/")),
         outputDirectory = outputDir,
         kotlinScriptTemplateClass = EmptyKotlinScriptTemplate::class.java
     )
