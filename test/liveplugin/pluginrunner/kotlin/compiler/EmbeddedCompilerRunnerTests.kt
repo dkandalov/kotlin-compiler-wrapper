@@ -1,8 +1,7 @@
 package liveplugin.pluginrunner.kotlin.compiler
 
 import org.hamcrest.CoreMatchers.equalTo
-import org.junit.Assert.assertThat
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
 import java.io.File
@@ -15,12 +14,14 @@ class EmbeddedCompilerRunnerTests {
         scriptSourceCode = ""
     ).run {
         assertThat(compileScript(), equalTo(emptyList()))
+        assertTrue(outputDir.resolve(expectedOutputFile).exists())
     }
 
     @Test fun `can compile println`() = KtsScriptFixture(
         scriptSourceCode = "println(123)"
     ).run {
         assertThat(compileScript(), equalTo(emptyList()))
+        assertTrue(outputDir.resolve(expectedOutputFile).exists())
     }
 
     @Test fun `can compile println of script template variable`() = KtsScriptFixture(
@@ -28,6 +29,7 @@ class EmbeddedCompilerRunnerTests {
         scriptTemplateClass = FooScriptTemplate::class
     ).run {
         assertThat(compileScript(), equalTo(emptyList()))
+        assertTrue(outputDir.resolve(expectedOutputFile).exists())
     }
 
     @Test fun `fails to compile unresolved reference`() = KtsScriptFixture(
@@ -36,6 +38,7 @@ class EmbeddedCompilerRunnerTests {
         val errors = compileScript()
         assertThat(errors.size, equalTo(1))
         assertTrue(errors.first().contains("unresolved reference: nonExistingFunction"))
+        assertFalse(outputDir.resolve(expectedOutputFile).exists())
     }
 }
 
@@ -44,6 +47,7 @@ private data class KtsScriptFixture(
     val scriptTemplateClass: KClass<*> = EmptyScriptTemplate::class,
     val srcDir: File = createTempDir(),
     val outputDir: File = createTempDir(),
+    val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) },
     val kotlinStdLibPath: String = System.getenv("kotlin-stdlib-path"),
     val kotlinScriptRuntimePath: String = System.getenv("kotlin-script-runtime-path"),
     val kotlinScriptCommonPath: String = System.getenv("kotlin-script-common-path"),
@@ -51,9 +55,7 @@ private data class KtsScriptFixture(
     val kotlinScriptCompilerEmbeddablePath: String = System.getenv("kotlin-script-compiler-embeddable-path"),
     val kotlinScriptCompilerImplEmbeddablePath: String = System.getenv("kotlin-script-compiler-impl-embeddable-path")
 ) {
-    init {
-        createTempFile(suffix = ".kts", directory = srcDir).writeText(scriptSourceCode)
-    }
+    val expectedOutputFile = srcFile.nameWithoutExtension.capitalize() + ".class"
 
     fun compileScript(): List<String> = compile(
         sourceRoot = srcDir.absolutePath,
