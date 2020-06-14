@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Ignore
 import org.junit.Test
 import java.io.File
+import kotlin.reflect.KClass
 import kotlin.script.experimental.annotations.KotlinScript
 
 @Ignore // Run manually because KtsScriptFixture needs paths to stdlib and kotlin scripting jars
@@ -22,6 +23,13 @@ class EmbeddedCompilerRunnerTests {
         assertThat(compileScript(), equalTo(emptyList()))
     }
 
+    @Test fun `can compile println of script template variable`() = KtsScriptFixture(
+        scriptSourceCode = "println(foo.toString())",
+        scriptTemplateClass = FooScriptTemplate::class
+    ).run {
+        assertThat(compileScript(), equalTo(emptyList()))
+    }
+
     @Test fun `fails to compile unresolved reference`() = KtsScriptFixture(
         scriptSourceCode = "nonExistingFunction()"
     ).run {
@@ -32,6 +40,8 @@ class EmbeddedCompilerRunnerTests {
 }
 
 private data class KtsScriptFixture(
+    val scriptSourceCode: String,
+    val scriptTemplateClass: KClass<*> = EmptyScriptTemplate::class,
     val srcDir: File = createTempDir(),
     val outputDir: File = createTempDir(),
     val kotlinStdLibPath: String = System.getenv("kotlin-stdlib-path"),
@@ -39,8 +49,7 @@ private data class KtsScriptFixture(
     val kotlinScriptCommonPath: String = System.getenv("kotlin-script-common-path"),
     val kotlinScriptJvmPath: String = System.getenv("kotlin-script-jvm"),
     val kotlinScriptCompilerEmbeddablePath: String = System.getenv("kotlin-script-compiler-embeddable-path"),
-    val kotlinScriptCompilerImplEmbeddablePath: String = System.getenv("kotlin-script-compiler-impl-embeddable-path"),
-    val scriptSourceCode: String
+    val kotlinScriptCompilerImplEmbeddablePath: String = System.getenv("kotlin-script-compiler-impl-embeddable-path")
 ) {
     init {
         createTempFile(suffix = ".kts", directory = srcDir).writeText(scriptSourceCode)
@@ -58,9 +67,13 @@ private data class KtsScriptFixture(
             File("build/classes/kotlin/test/")
         ),
         outputDirectory = outputDir,
-        kotlinScriptTemplateClass = EmptyKotlinScriptTemplate::class
+        kotlinScriptTemplateClass = scriptTemplateClass
     )
 }
 
 @KotlinScript
-class EmptyKotlinScriptTemplate
+class EmptyScriptTemplate
+
+@Suppress("unused")
+@KotlinScript
+abstract class FooScriptTemplate(val foo: Int)
