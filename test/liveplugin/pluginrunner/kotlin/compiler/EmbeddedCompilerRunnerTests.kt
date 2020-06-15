@@ -26,7 +26,7 @@ class EmbeddedCompilerRunnerTests {
 
     @Test fun `can compile println of script template variable`() = KtsScriptFixture(
         scriptSourceCode = "println(foo.toString())",
-        scriptTemplateClass = FooScriptTemplate::class
+        scriptTemplateClass = FooScriptTemplate::class.java
     ).run {
         assertThat(compileScript(), equalTo(emptyList()))
         assertTrue(outputDir.resolve(expectedOutputFile).exists())
@@ -44,7 +44,7 @@ class EmbeddedCompilerRunnerTests {
 
 private data class KtsScriptFixture(
     val scriptSourceCode: String,
-    val scriptTemplateClass: KClass<*> = EmptyScriptTemplate::class,
+    val scriptTemplateClass: Class<*> = EmptyScriptTemplate::class.java,
     val srcDir: File = createTempDir(),
     val outputDir: File = createTempDir(),
     val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) },

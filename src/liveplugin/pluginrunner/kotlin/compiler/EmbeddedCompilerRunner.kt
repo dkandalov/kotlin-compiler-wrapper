@@ -24,19 +24,21 @@ import org.jetbrains.kotlin.scripting.definitions.ScriptDefinition
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.script.experimental.host.ScriptingHostConfiguration
+import kotlin.script.experimental.host.configurationDependencies
 import kotlin.script.experimental.host.getScriptingClass
+import kotlin.script.experimental.jvm.JvmDependency
 import kotlin.script.experimental.jvm.JvmGetScriptingClass
 
 fun compile(
     sourceRoot: String,
     classpath: List<File>,
     outputDirectory: File,
-    kotlinScriptTemplateClass: KClass<*>
+    kotlinScriptTemplateClass: Class<*>
 ): List<String> {
     val rootDisposable = Disposer.newDisposable()
     try {
         val messageCollector = ErrorMessageCollector()
-        val configuration = createCompilerConfiguration(sourceRoot, classpath, outputDirectory, messageCollector, kotlinScriptTemplateClass)
+        val configuration = createCompilerConfiguration(sourceRoot, classpath, outputDirectory, messageCollector, kotlinScriptTemplateClass.kotlin)
         val kotlinEnvironment = KotlinCoreEnvironment.createForProduction(rootDisposable, configuration, JVM_CONFIG_FILES)
         val state = KotlinToJVMBytecodeCompiler.analyzeAndGenerate(kotlinEnvironment)
 
@@ -74,7 +76,10 @@ private fun createCompilerConfiguration(
         put(MODULE_NAME, "KotlinCompilerWrapperModule")
         put(MESSAGE_COLLECTOR_KEY, messageCollector)
         add(SCRIPT_DEFINITIONS, ScriptDefinition.FromTemplate(
-            ScriptingHostConfiguration { getScriptingClass(JvmGetScriptingClass()) },
+            ScriptingHostConfiguration {
+                configurationDependencies.put(listOf(JvmDependency(classpath)))
+                getScriptingClass(JvmGetScriptingClass())
+            },
             kotlinScriptTemplateClass
         ))
 
