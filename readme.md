@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/dkandalov/kotlin-compiler-wrapper/workflows/CI/badge.svg)](https://github.com/dkandalov/kotlin-compiler-wrapper/actions)
+
 This is a wrapper for kotlin compiler API to be used inside of [LivePlugin](https://github.com/dkandalov/live-plugin) (see `liveplugin.pluginrunner.kotlin.KotlinPluginRunner`).
 The main reason for pulling this code out of LivePlugin was that Kotlin has some classes 
 with **exactly the same fully qualified names** as classes in IntelliJ.
