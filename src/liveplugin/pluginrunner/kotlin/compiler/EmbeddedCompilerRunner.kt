@@ -33,12 +33,12 @@ fun compile(
     sourceRoot: String,
     classpath: List<File>,
     outputDirectory: File,
-    kotlinScriptTemplateClass: Class<*>
+    livePluginScriptClass: Class<*>
 ): List<String> {
     val rootDisposable = Disposer.newDisposable()
     try {
         val messageCollector = ErrorMessageCollector()
-        val configuration = createCompilerConfiguration(sourceRoot, classpath, outputDirectory, messageCollector, kotlinScriptTemplateClass.kotlin)
+        val configuration = createCompilerConfiguration(sourceRoot, classpath, outputDirectory, messageCollector, livePluginScriptClass.kotlin)
         val kotlinEnvironment = KotlinCoreEnvironment.createForProduction(rootDisposable, configuration, JVM_CONFIG_FILES)
         val state = KotlinToJVMBytecodeCompiler.analyzeAndGenerate(kotlinEnvironment)
 
@@ -69,7 +69,7 @@ private fun createCompilerConfiguration(
     classpath: List<File>,
     outputDirectory: File,
     messageCollector: MessageCollector,
-    kotlinScriptTemplateClass: KClass<*>
+    livePluginScriptClass: KClass<*>
 ): CompilerConfiguration {
     return CompilerConfiguration().apply {
         put(MODULE_NAME, "KotlinCompilerWrapperModule")
@@ -79,7 +79,7 @@ private fun createCompilerConfiguration(
                 configurationDependencies.put(listOf(JvmDependency(classpath)))
                 getScriptingClass(JvmGetScriptingClass())
             },
-            kotlinScriptTemplateClass
+            livePluginScriptClass
         ))
 
         add(CONTENT_ROOTS, KotlinSourceRoot(path = sourceRoot, isCommon = false))

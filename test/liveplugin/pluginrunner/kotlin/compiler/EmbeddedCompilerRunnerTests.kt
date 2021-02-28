@@ -69,7 +69,7 @@ private data class KtsScriptFixture(
             File("build/classes/kotlin/test/")
         ),
         outputDirectory = outputDir,
-        kotlinScriptTemplateClass = scriptTemplateClass
+        livePluginScriptClass = scriptTemplateClass
     )
 }
 
