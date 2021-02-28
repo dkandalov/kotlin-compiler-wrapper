@@ -5,7 +5,7 @@ import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
 import java.io.File
-import kotlin.reflect.KClass
+import java.nio.file.Files
 import kotlin.script.experimental.annotations.KotlinScript
 
 @Ignore // Run manually because KtsScriptFixture needs paths to stdlib and kotlin scripting jars
@@ -45,8 +45,8 @@ class EmbeddedCompilerRunnerTests {
 private data class KtsScriptFixture(
     val scriptSourceCode: String,
     val scriptTemplateClass: Class<*> = EmptyScriptTemplate::class.java,
-    val srcDir: File = createTempDir(),
-    val outputDir: File = createTempDir(),
+    val srcDir: File = Files.createTempDirectory("").toFile(),
+    val outputDir: File = Files.createTempDirectory("").toFile(),
     val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) },
     val kotlinStdLibPath: String = System.getenv("kotlin-stdlib-path"),
     val kotlinScriptRuntimePath: String = System.getenv("kotlin-script-runtime-path"),
