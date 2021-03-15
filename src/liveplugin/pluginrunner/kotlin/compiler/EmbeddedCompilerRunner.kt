@@ -70,31 +70,29 @@ private fun createCompilerConfiguration(
     outputDirectory: File,
     messageCollector: MessageCollector,
     livePluginScriptClass: KClass<*>
-): CompilerConfiguration {
-    return CompilerConfiguration().apply {
-        put(MODULE_NAME, "KotlinCompilerWrapperModule")
-        put(MESSAGE_COLLECTOR_KEY, messageCollector)
-        add(SCRIPT_DEFINITIONS, ScriptDefinition.FromTemplate(
-            ScriptingHostConfiguration {
-                configurationDependencies.put(listOf(JvmDependency(classpath)))
-                getScriptingClass(JvmGetScriptingClass())
-            },
-            livePluginScriptClass
-        ))
+) = CompilerConfiguration().apply {
+    put(MODULE_NAME, "KotlinCompilerWrapperModule")
+    put(MESSAGE_COLLECTOR_KEY, messageCollector)
+    add(SCRIPT_DEFINITIONS, ScriptDefinition.FromTemplate(
+        ScriptingHostConfiguration {
+            configurationDependencies.put(listOf(JvmDependency(classpath)))
+            getScriptingClass(JvmGetScriptingClass())
+        },
+        livePluginScriptClass
+    ))
 
-        add(CONTENT_ROOTS, KotlinSourceRoot(path = sourceRoot, isCommon = false))
-        classpath.forEach { path ->
-            add(CONTENT_ROOTS, JvmClasspathRoot(path))
-        }
-
-        // Based on org.jetbrains.kotlin.script.ScriptTestUtilKt#loadScriptingPlugin
-        PluginCliParser.loadPluginsSafe(
-            pluginOptions = null,
-            configuration = this,
-            pluginClasspaths = classpath.map { it.path }
-        )
-
-        put(RETAIN_OUTPUT_IN_MEMORY, false)
-        put(OUTPUT_DIRECTORY, outputDirectory)
+    add(CONTENT_ROOTS, KotlinSourceRoot(path = sourceRoot, isCommon = false))
+    classpath.forEach { file ->
+        add(CONTENT_ROOTS, JvmClasspathRoot(file))
     }
+
+    // Based on org.jetbrains.kotlin.script.ScriptTestUtilKt#loadScriptingPlugin
+    PluginCliParser.loadPluginsSafe(
+        pluginOptions = null,
+        configuration = this,
+        pluginClasspaths = classpath.map { it.path }
+    )
+
+    put(RETAIN_OUTPUT_IN_MEMORY, false)
+    put(OUTPUT_DIRECTORY, outputDirectory)
 }
