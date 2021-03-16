@@ -40,6 +40,22 @@ class EmbeddedCompilerRunnerTests {
         assertTrue(errors.first().contains("unresolved reference: nonExistingFunction"))
         assertFalse(outputFile.exists())
     }
+
+    @Ignore
+    @Test fun `KtVisitor shouldn't end up being incompatible with PsiElementVisitor`() = KtsScriptFixture(
+        scriptSourceCode = """
+            import org.jetbrains.kotlin.psi.*
+            import com.intellij.psi.PsiElementVisitor
+
+            println(KtVisitor::class)
+            println(PsiElementVisitor::class)
+            val foo: PsiElementVisitor = (expressionVisitor {} as KtVisitor<Void, Void>)
+            println(foo)
+        """
+    ).run {
+        assertThat(compileScript(), equalTo(emptyList()))
+        assertTrue(outputFile.exists())
+    }
 }
 
 private data class KtsScriptFixture(
@@ -60,13 +76,13 @@ private data class KtsScriptFixture(
     fun compileScript(): List<String> = compile(
         sourceRoot = srcDir.absolutePath,
         classpath = listOf(
-            File(kotlinStdLibPath),
-            File(kotlinScriptJvmPath),
-            File(kotlinScriptCommonPath),
-            File(kotlinScriptRuntimePath),
-            File(kotlinScriptCompilerEmbeddablePath),
-            File(kotlinScriptCompilerImplEmbeddablePath),
-            File("../build/classes/kotlin/test/")
+                File(kotlinStdLibPath),
+                File(kotlinScriptJvmPath),
+                File(kotlinScriptCommonPath),
+                File(kotlinScriptRuntimePath),
+                File(kotlinScriptCompilerEmbeddablePath),
+                File(kotlinScriptCompilerImplEmbeddablePath),
+                File("../build/classes/kotlin/test/")
         ),
         outputDirectory = outputDir,
         livePluginScriptClass = scriptTemplateClass
