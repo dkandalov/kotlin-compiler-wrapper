@@ -14,14 +14,14 @@ class EmbeddedCompilerRunnerTests {
         scriptSourceCode = ""
     ).run {
         assertThat(compileScript(), equalTo(emptyList()))
-        assertTrue(outputDir.resolve(expectedOutputFile).exists())
+        assertTrue(outputFile.exists())
     }
 
     @Test fun `can compile println`() = KtsScriptFixture(
         scriptSourceCode = "println(123)"
     ).run {
         assertThat(compileScript(), equalTo(emptyList()))
-        assertTrue(outputDir.resolve(expectedOutputFile).exists())
+        assertTrue(outputFile.exists())
     }
 
     @Test fun `can compile println of script template variable`() = KtsScriptFixture(
@@ -29,7 +29,7 @@ class EmbeddedCompilerRunnerTests {
         scriptTemplateClass = FooScriptTemplate::class.java
     ).run {
         assertThat(compileScript(), equalTo(emptyList()))
-        assertTrue(outputDir.resolve(expectedOutputFile).exists())
+        assertTrue(outputFile.exists())
     }
 
     @Test fun `fails to compile unresolved reference`() = KtsScriptFixture(
@@ -38,7 +38,7 @@ class EmbeddedCompilerRunnerTests {
         val errors = compileScript()
         assertThat(errors.size, equalTo(1))
         assertTrue(errors.first().contains("unresolved reference: nonExistingFunction"))
-        assertFalse(outputDir.resolve(expectedOutputFile).exists())
+        assertFalse(outputFile.exists())
     }
 }
 
@@ -46,16 +46,16 @@ private data class KtsScriptFixture(
     val scriptSourceCode: String,
     val scriptTemplateClass: Class<*> = EmptyScriptTemplate::class.java,
 ) {
-    val srcDir: File = Files.createTempDirectory("").toFile()
-    val outputDir: File = Files.createTempDirectory("").toFile()
-    val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) }
-    val kotlinStdLibPath: String = properties["kotlin-stdlib-path"]!!
-    val kotlinScriptRuntimePath: String = properties["kotlin-script-runtime-path"]!!
-    val kotlinScriptCommonPath: String = properties["kotlin-script-common-path"]!!
-    val kotlinScriptJvmPath: String = properties["kotlin-script-jvm"]!!
-    val kotlinScriptCompilerEmbeddablePath: String = properties["kotlin-script-compiler-embeddable-path"]!!
-    val kotlinScriptCompilerImplEmbeddablePath: String = properties["kotlin-script-compiler-impl-embeddable-path"]!!
-    val expectedOutputFile = srcFile.nameWithoutExtension.capitalize() + ".class"
+    private val srcDir: File = Files.createTempDirectory("").toFile()
+    private val outputDir: File = Files.createTempDirectory("").toFile()
+    private val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) }
+    private val kotlinStdLibPath: String = properties["kotlin-stdlib-path"]!!
+    private val kotlinScriptRuntimePath: String = properties["kotlin-script-runtime-path"]!!
+    private val kotlinScriptCommonPath: String = properties["kotlin-script-common-path"]!!
+    private val kotlinScriptJvmPath: String = properties["kotlin-script-jvm"]!!
+    private val kotlinScriptCompilerEmbeddablePath: String = properties["kotlin-script-compiler-embeddable-path"]!!
+    private val kotlinScriptCompilerImplEmbeddablePath: String = properties["kotlin-script-compiler-impl-embeddable-path"]!!
+    val outputFile get() = outputDir.resolve(srcFile.nameWithoutExtension.capitalize() + ".class")
 
     fun compileScript(): List<String> = compile(
         sourceRoot = srcDir.absolutePath,
