@@ -8,7 +8,7 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.script.experimental.annotations.KotlinScript
 
-@Ignore // Run manually because KtsScriptFixture needs paths to stdlib and kotlin scripting jars
+@Ignore // Run manually from current ContentRoot because KtsScriptFixture needs paths to stdlib and kotlin scripting jars
 class EmbeddedCompilerRunnerTests {
     @Test fun `can compile an empty file`() = KtsScriptFixture(
         scriptSourceCode = ""
@@ -45,16 +45,16 @@ class EmbeddedCompilerRunnerTests {
 private data class KtsScriptFixture(
     val scriptSourceCode: String,
     val scriptTemplateClass: Class<*> = EmptyScriptTemplate::class.java,
-    val srcDir: File = Files.createTempDirectory("").toFile(),
-    val outputDir: File = Files.createTempDirectory("").toFile(),
-    val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) },
-    val kotlinStdLibPath: String = ktsScriptFixtureProperties["kotlin-stdlib-path"]!!,
-    val kotlinScriptRuntimePath: String = ktsScriptFixtureProperties["kotlin-script-runtime-path"]!!,
-    val kotlinScriptCommonPath: String = ktsScriptFixtureProperties["kotlin-script-common-path"]!!,
-    val kotlinScriptJvmPath: String = ktsScriptFixtureProperties["kotlin-script-jvm"]!!,
-    val kotlinScriptCompilerEmbeddablePath: String = ktsScriptFixtureProperties["kotlin-script-compiler-embeddable-path"]!!,
-    val kotlinScriptCompilerImplEmbeddablePath: String = ktsScriptFixtureProperties["kotlin-script-compiler-impl-embeddable-path"]!!,
 ) {
+    val srcDir: File = Files.createTempDirectory("").toFile()
+    val outputDir: File = Files.createTempDirectory("").toFile()
+    val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) }
+    val kotlinStdLibPath: String = properties["kotlin-stdlib-path"]!!
+    val kotlinScriptRuntimePath: String = properties["kotlin-script-runtime-path"]!!
+    val kotlinScriptCommonPath: String = properties["kotlin-script-common-path"]!!
+    val kotlinScriptJvmPath: String = properties["kotlin-script-jvm"]!!
+    val kotlinScriptCompilerEmbeddablePath: String = properties["kotlin-script-compiler-embeddable-path"]!!
+    val kotlinScriptCompilerImplEmbeddablePath: String = properties["kotlin-script-compiler-impl-embeddable-path"]!!
     val expectedOutputFile = srcFile.nameWithoutExtension.capitalize() + ".class"
 
     fun compileScript(): List<String> = compile(
@@ -71,14 +71,16 @@ private data class KtsScriptFixture(
         outputDirectory = outputDir,
         livePluginScriptClass = scriptTemplateClass
     )
-}
 
-private val ktsScriptFixtureProperties by lazy {
-    File("liveplugin/pluginrunner/kotlin/compiler/fixture.properties").readLines()
-        .map { line -> line.split("=") }
-        .map { (key, value) -> key to value.replace("\$USER_HOME", System.getProperty("user.home")) }
-        .onEach { (_, value) -> if (!File(value).exists()) error("File doesn't exist: $value") }
-        .toMap()
+    companion object {
+        private val properties by lazy {
+            File("liveplugin/pluginrunner/kotlin/compiler/fixture.properties").readLines()
+                .map { line -> line.split("=") }
+                .map { (key, value) -> key to value.replace("\$USER_HOME", System.getProperty("user.home")) }
+                .onEach { (_, value) -> if (!File(value).exists()) error("File doesn't exist: $value") }
+                .toMap()
+        }
+    }
 }
 
 @KotlinScript
