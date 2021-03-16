@@ -48,12 +48,12 @@ private data class KtsScriptFixture(
     val srcDir: File = Files.createTempDirectory("").toFile(),
     val outputDir: File = Files.createTempDirectory("").toFile(),
     val srcFile: File = File("${srcDir.absolutePath}/script.kts").also { it.writeText(scriptSourceCode) },
-    val kotlinStdLibPath: String = System.getenv("kotlin-stdlib-path"),
-    val kotlinScriptRuntimePath: String = System.getenv("kotlin-script-runtime-path"),
-    val kotlinScriptCommonPath: String = System.getenv("kotlin-script-common-path"),
-    val kotlinScriptJvmPath: String = System.getenv("kotlin-script-jvm"),
-    val kotlinScriptCompilerEmbeddablePath: String = System.getenv("kotlin-script-compiler-embeddable-path"),
-    val kotlinScriptCompilerImplEmbeddablePath: String = System.getenv("kotlin-script-compiler-impl-embeddable-path")
+    val kotlinStdLibPath: String = ktsScriptFixtureProperties["kotlin-stdlib-path"]!!,
+    val kotlinScriptRuntimePath: String = ktsScriptFixtureProperties["kotlin-script-runtime-path"]!!,
+    val kotlinScriptCommonPath: String = ktsScriptFixtureProperties["kotlin-script-common-path"]!!,
+    val kotlinScriptJvmPath: String = ktsScriptFixtureProperties["kotlin-script-jvm"]!!,
+    val kotlinScriptCompilerEmbeddablePath: String = ktsScriptFixtureProperties["kotlin-script-compiler-embeddable-path"]!!,
+    val kotlinScriptCompilerImplEmbeddablePath: String = ktsScriptFixtureProperties["kotlin-script-compiler-impl-embeddable-path"]!!,
 ) {
     val expectedOutputFile = srcFile.nameWithoutExtension.capitalize() + ".class"
 
@@ -66,11 +66,19 @@ private data class KtsScriptFixture(
             File(kotlinScriptRuntimePath),
             File(kotlinScriptCompilerEmbeddablePath),
             File(kotlinScriptCompilerImplEmbeddablePath),
-            File("build/classes/kotlin/test/")
+            File("../build/classes/kotlin/test/")
         ),
         outputDirectory = outputDir,
         livePluginScriptClass = scriptTemplateClass
     )
+}
+
+private val ktsScriptFixtureProperties by lazy {
+    File("liveplugin/pluginrunner/kotlin/compiler/fixture.properties").readLines()
+        .map { line -> line.split("=") }
+        .map { (key, value) -> key to value.replace("\$USER_HOME", System.getProperty("user.home")) }
+        .onEach { (_, value) -> if (!File(value).exists()) error("File doesn't exist: $value") }
+        .toMap()
 }
 
 @KotlinScript
