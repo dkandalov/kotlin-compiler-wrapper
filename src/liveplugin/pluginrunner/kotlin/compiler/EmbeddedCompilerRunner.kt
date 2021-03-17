@@ -17,8 +17,8 @@ import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
 import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.MODULE_NAME
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.config.JVMConfigurationKeys.OUTPUT_DIRECTORY
-import org.jetbrains.kotlin.config.JVMConfigurationKeys.RETAIN_OUTPUT_IN_MEMORY
+import org.jetbrains.kotlin.config.JVMConfigurationKeys.*
+import org.jetbrains.kotlin.config.JvmTarget.JVM_11
 import org.jetbrains.kotlin.scripting.configuration.ScriptingConfigurationKeys.SCRIPT_DEFINITIONS
 import org.jetbrains.kotlin.scripting.definitions.ScriptDefinition
 import java.io.File
@@ -93,6 +93,7 @@ private fun createCompilerConfiguration(
         pluginClasspaths = classpath.map { it.path }
     )
 
+    put(JVM_TARGET, JVM_11)
     put(RETAIN_OUTPUT_IN_MEMORY, false)
     put(OUTPUT_DIRECTORY, outputDirectory)
 }
